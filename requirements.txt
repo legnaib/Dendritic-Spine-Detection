@@ -1,0 +1,10 @@
+tensorflow==1.14.0
+opencv-python
+pandas
+pillow
+pycocotools
+scipy
+dataclasses
+pyyaml
+tf_slim
+lvis
