@@ -51,7 +51,6 @@ This github repository provides all necessary files to predict and track dendrit
 ```
 The `default_model` folders and files do already exist, this is the model reaching human performance. Other retrained models can be added as well, marked with `custom_model`.
 
-
 ## Prediction on 2D-images
 Before predicting on 2D-images, the images must be converted into the correct format. A few conversion scripts can be found in the `convert_data/` directory. Making sure that our model performs best, the images should be in `.png` Format and should have a size of 512x512 pixel.
 
@@ -59,7 +58,7 @@ The name of the model which the user wants to use is referred to as `MODEL_NAME`
 
 An example prediction will look like this:
 ```
-python predict.py --model=own_models/MODEL_NAME --labelmap=data/spine_label_map.pbtxt --input="data/raw_images/SR052*.png" --output
+python predict.py --model=MODEL_NAME --input="data/raw_images/SR052*.png" --save_images
 ```
 All images with their predictions will be saved in the folder `output/prediction/MODEL_NAME/images` and all csv files will be saved in `output/prediction/MODEL_NAME/csvs`.
 
@@ -68,17 +67,17 @@ All images with their predictions will be saved in the folder `output/prediction
 If a 3D-stack of images should be analyzed there are two possibilities to do that:
 1. Predict and track everything in one single command:
     ```
-    python tracking.py --model=own_models/MODEL_NAME --labelmap=data/spine_label_map.pbtxt --images="data/raw_images/SR052*.png" --save_images
+    python tracking.py --model=MODEL_NAME --images="data/raw_images/SR052*.png" --save_images
     ```
 2. Predict first or choose different prediction files and use the tracking algorithm to get total 3D-trajectories. Two commands must be executed for that:
     ```
-    python predict.py --model=own_models/MODEL_NAME --labelmap=data/spine_label_map.pbtxt --input="data/raw_images/SR052*.png" --output
+    python predict.py --model=MODEL_NAME --input="data/raw_images/SR052*.png"
 
-    python tracking.py --model=own_models/MODEL_NAME --labelmap=data/spine_label_map.pbtxt --images="data/raw_images/SR052*.png" --csv="output/prediction/MODEL_NAME/csvs/*.csv" --save_images
+    python tracking.py --model=MODEL_NAME --images="data/raw_images/SR052*.png" --csv="output/prediction/MODEL_NAME/csvs/*.csv" --save_images
     ```
     Every csv-file in a valid format can be used at the `--csv`-flag to determine which predictions the tracking algorithm should take.
 
-Default settings will save all images in the folder `output/tracking/MODEL_NAME/images` together with the single tracking file `output/tracking/MODEL_NAME/data_tracking.csv`
+Default settings will save all images in the folder `output/tracking/MODEL_NAME/images` together with the single tracking file `output/tracking/MODEL_NAME/data_tracking.csv`. Only the images resulting of the tracking algorithm are of interest, therefore the `--save_images` flag is removed from the prediction part.
 
 ### File format for prediction and tracking csv
 The prediction csv files are named exactly as the images they are saving the detections for. Column names are `filename,width,height,class,score,xmin,ymin,xmax,ymax`:

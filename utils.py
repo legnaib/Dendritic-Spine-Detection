@@ -2,14 +2,22 @@ from scipy.spatial import distance as dist
 from collections import OrderedDict
 import numpy as np
 
-def calc_IoM(centroid1, centroid2):
-    cX1, cY1, w1, h1 = centroid1[:4]
-    cX2, cY2, w2, h2 = centroid2[:4]
-    area1 = w1*h1; area2 = w2*h2
-
-    x11, x12, y11, y12 = cX1-w1/2, cX1+w1/2, cY1-h1/2, cY1+h1/2
-    x21, x22, y21, y22 = cX2-w2/2, cX2+w2/2, cY2-h2/2, cY2+h2/2
-
+def calc_IoM(centroid1=None, centroid2=None, rect1=None, rect2=None):
+    # if centroids are given -> calc box coordinates first before calculating everything
+    if centroid1 is not None and centroid2 is not None:
+        cX1, cY1, w1, h1 = centroid1[:4]
+        cX2, cY2, w2, h2 = centroid2[:4]
+    
+        x11, x12, y11, y12 = cX1-w1/2, cX1+w1/2, cY1-h1/2, cY1+h1/2
+        x21, x22, y21, y22 = cX2-w2/2, cX2+w2/2, cY2-h2/2, cY2+h2/2
+    elif rect1 is not None and rect2 is not None:
+        x11, y11, x12, y12 = rect1
+        x21, y21, x22, y22 = rect2
+    else:
+        raise AttributeError("You have to provide either two centroids or two boxes but neither is given.")
+    
+    area1 = (x12-x11)*(y12-y11); area2 = (x22-x21)*(y22-y21)
+    
     x1, x2, y1, y2 = max(x11,x21), min(x12,x22), max(y11,y21), min(y12,y22)
     if x1 >= x2 or y1 >= y2:# or area1 >= 100*100 or area2 >= 100*100:
         return 0

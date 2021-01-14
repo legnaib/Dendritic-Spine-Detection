@@ -8,7 +8,7 @@ import time
 import scipy.io
 import predict
 
-import CentroidTracker as CT
+from utils import CentroidTracker as CT
 from collections import OrderedDict
 
 # models/research/object_detection muss im PYTHONPATH sein
@@ -27,17 +27,17 @@ parser.add_argument('-a', '--appeared',
 parser.add_argument('-d', '--disappeared',
     help='disappeared counter', default=1, type=int)
 parser.add_argument('-th', '--theta',
-    help='Threshold for theta', default=0.5, type=float)
+    help='Threshold for theta (detection similarity threshold)', default=0.5, type=float)
 parser.add_argument('-ta', '--tau',
-    help='Threshold for tau', default=0.3, type=float)
+    help='Threshold for tau (tracking threshold)', default=0.3, type=float)
 parser.add_argument('-m', '--model',
     help='Path to model you want to analyze with')
-parser.add_argument('-lm', '--labelmap',
-    help='Path to labelmap', default='data/spine_label_map.pbtxt')
+# parser.add_argument('-lm', '--labelmap',
+#     help='Path to labelmap', default='data/spine_label_map.pbtxt')
 parser.add_argument('-c', '--csv', required=False,
     help='Single file or folder of csv files for previous prediction. If this flag is set, no model prediction will be executed')
 
-parser.add_argument('-s', '--save_images', action='store_false', \
+parser.add_argument('-s', '--save_images', action='store_true', \
     help='Activate this flag if images should be saved')
 parser.add_argument('-o', '--output', required=False, \
     help='Path where tracking images and csv should be saved, default: output/tracking/MODEL')
@@ -107,7 +107,7 @@ if __name__ == '__main__':
     MIN_APP = args.appeared
     MAX_DIS = args.disappeared
     METRIC = args.metric
-    PATH_TO_LABELS = args.labelmap
+    # PATH_TO_LABELS = args.labelmap
     NUM_CLASSES = 1
     MAX_VOL = 2000
 
@@ -158,7 +158,7 @@ if __name__ == '__main__':
     # get all boxes, scores and classes at the start if prediction is necessary:
     if args.csv is None:
         detection_graph = predict.load_model(args.model)
-        all_boxes, all_scores, all_classes, all_num_detections = predict.predict_images(detection_graph, args.images, img_output_path, csv_output_path, save_csv=False, return_csv=True):
+        all_boxes, all_scores, all_classes, all_num_detections = predict.predict_images(detection_graph, args.images, img_output_path, csv_output_path, THRESH, save_csv=False, return_csv=True):
 
     ct = CT.CentroidTracker(maxDisappeared=MAX_DIS, minAppeared=MIN_APP, maxDiff=MAX_DIFF, iomThresh=IOM_THRESH, maxVol=MAX_VOL, metric=METRIC)
 

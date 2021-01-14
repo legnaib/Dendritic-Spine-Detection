@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# own model
+own_models/
+data/raw/
+
 # C extensions
 *.so
 
