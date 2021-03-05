@@ -1,5 +1,17 @@
 # Dendritic-Spine-Detection
-Code for detecting dendritic spines
+Code for detecting dendritic spines in three dimensions, retraining and evaluating models.
+
+Structure of this guide:
+1. Installation
+2. Folder structure
+3. Prediction on 2D-images
+4. Prediction and tracking on 3D-images
+   - File format for prediction and tracking csv
+5. Re-Training with new dataset
+   - Prepare dataset
+   - Training
+   - Prepare model for inference
+6. Model evaluation
 
 ## Installation
 All necessary packages are listed in the `requirements.txt` file. To install packages with pip simply run
@@ -115,3 +127,5 @@ For inference the `frozen_inference_graph.pb` is needed. This can be obtained by
 ```
 python models/research/object_detection/export_inference_graph.py --pipeline_config_path=config_files/MODEL_NAME.config --trained_checkpoint_prefix=own_models/MODEL_NAME/model.ckpt-NR_STEPS --output_directory=own_models/MODEL_NAME
 ```
+
+## Model evaluation

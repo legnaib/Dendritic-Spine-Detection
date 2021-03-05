@@ -1,0 +1,2 @@
+export PYTHONPATH=$PYTHONPATH:/models/research/slim:/models/research:/models/research/object_detection
+python3 evaluate_tracking.py -det output/tracking/GT_person1 -gt output/tracking/GT/data_tracking.csv -tr data_tracking_person1.csv -sn GT_person1_results
