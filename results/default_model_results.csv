@@ -1,0 +1,2 @@
+timestamp,detection_threshold,fscore,precision,recall,nr_detected,nr_gt,nr_gt_detected
+2021-04-10 18:51:50.949520,0.5,0.8983050847457628,0.8412698412698413,0.9636363636363636,63,55,53

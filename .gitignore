@@ -1,3 +1,6 @@
+# annotation files which cannot be used like this as images are missing
+data/default_annotations/*.csv
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

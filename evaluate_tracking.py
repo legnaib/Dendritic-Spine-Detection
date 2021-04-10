@@ -8,7 +8,7 @@ import pandas as pd
 import datetime
 
 from collections import OrderedDict
-import CentroidTracker as CT
+from utils import CentroidTracker as CT
 import numpy as np
 import pandas as pd
 
@@ -119,18 +119,16 @@ if __name__ == "__main__":
         help='used metric. Options are \'own\' or \'iou\'')
     parser.add_argument('-tr', '--tracking', default='',
         help='path of used tracking file')
-    parser.add_argument('-dt', dest='det_threshold', default=0.5, metavar='',
+    parser.add_argument('-dt', '--detection-threshold', dest='det_threshold', default=0.5, metavar='',
         help='detection threshold for real detection')
-    parser.add_argument('-gt', dest='gt_file', default='GT_total_new_0820/data_tracking_maximum_theta30.csv',
+    parser.add_argument('-gt', dest='gt_file', default='data/tracking/GT/data_tracking.csv',
         help='given a list of gtFolders, name of gt_file is enough, otherwise a list of gt_files must be given, comma separated')
-    parser.add_argument('-n', '--nr', dest='nr', default=1,
-        help='number for saving')
     parser.add_argument('-sp', '--savepath', dest='savePath', metavar='',
         help='folder where the plots are saved')
     parser.add_argument('-sn', '--savename', dest='saveName', default='',
         help='name of results file')
-    parser.add_argument('-np', '--noplot', dest='showPlot', action='store_false',
-        help='no plot is shown during execution')
+    parser.add_argument('-ow', '--overwrite', action='store_true',
+        help='whether to overwrite the results of the previous iteration or just append it')
     args = parser.parse_args()
 
     iouThreshold = args.iouThreshold
@@ -178,9 +176,6 @@ if __name__ == "__main__":
         savePath = 'results'
     if not os.path.exists(savePath):
         os.makedirs(savePath)
-    # Show plot during execution
-    showPlot = args.showPlot
-    nr = args.nr
     real_det_thresh = float(args.det_threshold)
     # det_thresh = int(real_det_thresh*10)
     total_spines = []
@@ -194,6 +189,8 @@ if __name__ == "__main__":
         # print(f"[INFO] Number of Spines in GT: {len(centroids1)}")
         centroids2 = calc_centroids_given_tracking(os.path.join(detFolder, args.tracking)) # args.det_threshold
 
+        nr_gt = len(centroids1)
+        nr_det = len(centroids2)
         # should be 75 for 1005_final_new!!
         # print(f"[INFO] Number of Spines in Detection: {len(centroids2)}")
         thresh = 0.5
@@ -219,7 +216,7 @@ if __name__ == "__main__":
             if best_metric >= thresh: # and best_3d_distance >= thresh:
                 both_spines[best_key] = (best_other_key, best_metric) # , best_3d_distance)
                 del centroids1[best_other_key]
-        print(f"{'# spines':^13s}|{len(centroids1):^10d}|{len(centroids2):^10d}|{len(both_spines):^10d}")
+        print(f"{'# spines':^13s}|{nr_gt:^10d}|{nr_det:^10d}|{len(both_spines):^10d}")
         # print(f"[INFO] Overlapping Boxes: {len(both_spines)}")
 
         total_spines.append(total_spines1)
@@ -229,9 +226,9 @@ if __name__ == "__main__":
     recall = np.array(total_both_spines)/total_spines
     fscore = list(precision*recall*2/(precision+recall))
     if args.saveName != '':
-        filename = os.path.join(savePath, 'results_'+args.saveName+'.csv')
+        filename = os.path.join(savePath, args.saveName+'.csv')
     else:
-        filename = os.path.join(savePath, 'results_'+detFolder.split('/')[-1]+'.csv')
+        filename = os.path.join(savePath, detFolder.split('/')[-1]+'.csv')
     if os.path.exists(filename):
         df = pd.read_csv(filename)
     else:
@@ -244,7 +241,7 @@ if __name__ == "__main__":
         'recall': recall,
         'fscore': fscore,
         'detection_threshold': real_det_thresh,
-        'date': str(datetime.datetime.now())
+        'timestamp': str(datetime.datetime.now())
     })
     for i in range(len(precision)):
         print(f"{' Precision '+str(i+1):<13s}|          |{precision[i]:^10f}|")
@@ -252,5 +249,11 @@ if __name__ == "__main__":
         print(f"{' Recall '+str(i+1):<13s}|          |{recall[i]:^10f}|")
     for i in range(len(fscore)):
         print(f"{' F-Score '+str(i+1):<13s}|          |{fscore[i]:^10f}|")
-    together = df.append(new_df, sort=False)
-    together.to_csv(filename, index=False)
+    
+    # sort columns
+    new_df = new_df[['timestamp', 'detection_threshold', 'fscore', 'precision', 'recall', 'nr_detected', 'nr_gt', 'nr_gt_detected']]
+    if args.overwrite:
+        new_df.to_csv(filename, index=False)
+    else:
+        together = df.append(new_df, sort=False)
+        together.to_csv(filename, index=False)

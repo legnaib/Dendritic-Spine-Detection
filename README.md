@@ -18,6 +18,7 @@ All necessary packages are listed in the `requirements.txt` file. To install pac
 ```
 pip install -r requirements.txt
 ```
+The model is not saved in GitHub, but should be downloaded [here]() and then extracted into the `own_models/default_model` folder. Most files are also available as shell scripts with some predefined arguments.
 
 ## Folder structure
 This github repository provides all necessary files to predict and track dendritic spines as described in the paper TODO. Retraining on another dataset is possible as well. The mainly relevant files and structures of this repository are:
@@ -26,6 +27,9 @@ This github repository provides all necessary files to predict and track dendrit
 |   |-- custom_model.config
 |   `-- default_model.config
 |-- convert_data
+|   |-- via.html
+|   |-- via_to_csv.py
+|   |-- split_csv_train_valid_test.py
 |   `-- generate_tfrecord.py
 |-- data
 |   |-- raw
@@ -34,8 +38,7 @@ This github repository provides all necessary files to predict and track dendrit
 |   `-- research
 |       |-- slim
 |       `-- object_detection
-|           |-- export_inference_graph.py
-|           `-- model_main.py
+|           `-- export_inference_graph.py
 |-- output
 |   |-- prediction
 |   |   |-- custom_model
@@ -56,7 +59,8 @@ This github repository provides all necessary files to predict and track dendrit
 |   |   `-- frozen_inference_graph.pbtxt
 |   `-- default_model
 |       `-- frozen_inference_graph.pbtxt
-|-- CentroidTracker.py
+|-- utils.py
+|-- train.py
 |-- predict.py
 |-- requirements.py
 `-- tracking.py
@@ -105,13 +109,20 @@ The tracking file is built very similar. The only change is an additional column
 
 ## Re-Training with new dataset
 ### Prepare dataset
-TODO.
+The labeling can be done with the [VGG Image Annotator](https://www.robots.ox.ac.uk/~vgg/software/via/) using the provided `convert_data/via.html` script. After creating all labels, the data has first to be converted to the correct format with `convert_data/via_to_csv.py` and split into train, validation and test datasets using `convert_data/split_csv_train_valid_test.py`.
+
 After saving all data in csv files, `.tfrecord` files must be created. The necessary files `train.csv`, `valid.csv` and `test.csv` are saved in the `data/PATH_TO_CSV` folder and the images the csv-files are referring to are inside  the folder `data/PATH_TO_IMAGES`. The conversion can be done by executing the following command three times and each time replacing `FILENAME.csv` with either `train.csv`, `valid.csv` or `test.csv`:
 ```
 python convert_data/generate_tfrecord.py --csv_input=data/PATH_TO_CSV/FILENAME.csv --output_path=data/PATH_TO_CSV/FILENAME.record --image_dir=data/PATH_TO_IMAGES
 ```
 
 ### Training
+Given a config file `CONFIG_NAME.config`, the output training folder `TRAINING_NAME` and the number of steps `NR_STEPS` that should be trained for, training can be started by executing the following command:
+```
+python train.py --model_dir=own_models/TRAINING_NAME --pipeline_config_path=config_files/CONFIG_NAME.config --num_train_steps=NR_STEPS --alsologtostderr
+```
+For a better overview of config files and training folders it is recommended to use the same name: `TRAINING_NAME=CONFIG_NAME`. The original script can be found in `model/research/object_detection` and is named `model_main.py`.
+
 ### Prepare model for inference
 Before being able to use inference and let the model predict spines as described in previous sections, the model needs to be converted to a frozen inference graph. After training the model for `NR_STEPS` amount of steps, the folder structure should look like this:
 ```
@@ -121,7 +132,7 @@ Before being able to use inference and let the model predict spines as described
         |-- graph.pbtxt
         |-- model.ckpt-NR_STEPS.data-00000-of-00001
         |-- model.ckpt-NR_STEPS.index
-        |-- model.ckpt-NR_STEPS.meta
+        `-- model.ckpt-NR_STEPS.meta
 ```
 For inference the `frozen_inference_graph.pb` is needed. This can be obtained by calling
 ```
@@ -129,3 +140,17 @@ python models/research/object_detection/export_inference_graph.py --pipeline_con
 ```
 
 ## Model evaluation
+After using the model `MODEL_NAME` together with the tracker to create a `DATA_TRACKING_FILE` one can compare the results to a given groundtruth example by using the following command:
+```
+python evaluate_tracking.py --detfolder output/tracking/MODEL_NAME --gtfolder output/tracking/GT/data_tracking.csv --tracking DATA_TRACKING_FILE.csv --savename SAVE_NAME
+```
+The output csv-file will be saved under `results/SAVE_NAME.csv`. Its format has colum names `timestamp,detection_threshold,fscore,precision,recall,nr_detected,nr_gt,nr_gt_detected`:
+
+- `timestamp`: Timestamp of model evaluation
+- `detection_threshold`: Reminder of the used detection threshold. Default set to 0.5 and has to be adjusted manually according to the used detection threshold while tracking
+- `fscore,precision,recall`: $`F^{3D}_1`$-score, Precision and Recall of the 3D detected spines using the $`IoM`$
+- `nr_detected,nr_gt,nr_gt_detected`: number of spines only detected by model, only detected by groundtruth or detected by both.
+
+<!-- - <img src="https://latex.codecogs.com/gif.latex?F^{3D}_1 " /> -->
+
+<!-- ![equation](https://latex.codecogs.com/gif.latex?F^{3D}_1) -->

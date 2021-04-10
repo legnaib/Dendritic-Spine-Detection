@@ -18,7 +18,7 @@ parser = argparse.ArgumentParser(description='Track spines in the whole stack',
 
 # parser.add_argument('-T', '--tif', required=False,
 #     help='Path to input tif stack, if this and image-flag are set, images are priorized')
-parser.add_argument('-i', '--images', required=False
+parser.add_argument('-i', '--images', required=False,
     help='Path to input images')
 parser.add_argument('-t', '--threshold',
     help='Threshold for detection', default=0.5, type=float)
@@ -122,8 +122,8 @@ if __name__ == '__main__':
     model_name = args.model.split("/")[-1] if args.model.split("/")[-1] != "" else args.model.split("/")[-2]
     if args.output is None:
         args.output = os.path.join('output/tracking', model_name) # os.path.join(args.save, args.model.split('/')[-1]
-    if not os.path.exists(save_folder):
-        os.makedirs(save_folder)
+    if not os.path.exists(args.output):
+        os.makedirs(args.output)
     img_output_path = os.path.join(args.output, 'images')
     csv_output_path = os.path.join(args.output, args.file_save)
     if args.save_images and not os.path.exists(img_output_path):
@@ -152,7 +152,6 @@ if __name__ == '__main__':
         all_csv_files = glob.glob(args.csv)
         if len(all_csv_files) == 0:
             raise ValueError('No csv files with valid prediction data are available.')
-         and len(all_csvs) == 1:
         csv_path = args.csv 
 
     # get all boxes, scores and classes at the start if prediction is necessary:
