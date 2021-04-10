@@ -148,7 +148,7 @@ The output csv-file will be saved under `results/SAVE_NAME.csv`. Its format has 
 
 - `timestamp`: Timestamp of model evaluation
 - `detection_threshold`: Reminder of the used detection threshold. Default set to 0.5 and has to be adjusted manually according to the used detection threshold while tracking
-- `fscore,precision,recall`: $`F^{3D}_1`$-score, Precision and Recall of the 3D detected spines using the $`IoM`$
+- `fscore,precision,recall`: ![formula](https://render.githubusercontent.com/render/math?math=F^{3D}_1)-score, Precision and Recall of the 3D detected spines using the ![formula](https://render.githubusercontent.com/render/math?math=IoM)
 - `nr_detected,nr_gt,nr_gt_detected`: number of spines only detected by model, only detected by groundtruth or detected by both.
 
 <!-- - <img src="https://latex.codecogs.com/gif.latex?F^{3D}_1 " /> -->
