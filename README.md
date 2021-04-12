@@ -18,7 +18,7 @@ All necessary packages are listed in the `requirements.txt` file. To install pac
 ```
 pip install -r requirements.txt
 ```
-The model is not saved in GitHub, but should be downloaded [here]() and then extracted into the `own_models/default_model` folder. Most files are also available as shell scripts with some predefined arguments.
+The model, training and evaluation images are not saved in GitHub, but can be downloaded [here](https://drive.google.com/uc?export=download&id=1r9bGOeOxEd6Clg8Sw5ajcxLO-C_xC9K8). The model and images should then be extracted into the `own_models/default_model` and `data/raw` folder. Training and tracking evaluation are also available as shell scripts with some predefined arguments.
 
 ## Folder structure
 This github repository provides all necessary files to predict and track dendritic spines as described in the paper TODO. Retraining on another dataset is possible as well. The mainly relevant files and structures of this repository are:
@@ -109,7 +109,11 @@ The tracking file is built very similar. The only change is an additional column
 
 ## Re-Training with new dataset
 ### Prepare dataset
-The labeling can be done with the [VGG Image Annotator](https://www.robots.ox.ac.uk/~vgg/software/via/) using the provided `convert_data/via.html` script. After creating all labels, the data has first to be converted to the correct format with `convert_data/via_to_csv.py` and split into train, validation and test datasets using `convert_data/split_csv_train_valid_test.py`.
+The labeling can be done with the [VGG Image Annotator](https://www.robots.ox.ac.uk/~vgg/software/via/) using the provided `via.html` script. Already created labels can be load using the menu button `Annotations - Import Annotations (from csv)`. If the labels are not in via-format, but already in the format used for training, these files can be converted using the `convert_data/via_to_csv.py` script.
+
+**Attention**: To load the images correctly, the `Default Path` in the settings menu has to be set to the path where the images are saved.
+
+After creating all labels, the data has first to be converted to the correct format with `convert_data/via_to_csv.py` and split into train, validation and test datasets using `convert_data/split_csv_train_valid_test.py`.
 
 After saving all data in csv files, `.tfrecord` files must be created. The necessary files `train.csv`, `valid.csv` and `test.csv` are saved in the `data/PATH_TO_CSV` folder and the images the csv-files are referring to are inside  the folder `data/PATH_TO_IMAGES`. The conversion can be done by executing the following command three times and each time replacing `FILENAME.csv` with either `train.csv`, `valid.csv` or `test.csv`:
 ```
