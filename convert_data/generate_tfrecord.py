@@ -18,21 +18,20 @@ import tensorflow.compat.v1 as tf
 from PIL import Image
 from object_detection.utils import dataset_util
 from collections import namedtuple, OrderedDict
+import argparse
 
-flags = tf.app.flags
-flags.DEFINE_string('csv_input', '', 'Path to the CSV input')
-flags.DEFINE_string('output_path', '', 'Path to output TFRecord')
-flags.DEFINE_string('image_dir', '', 'Path to images')
-FLAGS = flags.FLAGS
+parser = argparse.ArgumentParser()
+parser.add_argument('-i', '--csv_input', help='Path to the CSV input')
+parser.add_argument('-o', '--output_path', help='Path to the output TFRecord')
+parser.add_argument('--image_dir', help='Path to image folder')
+args = parser.parse_args()
 
-
-# TO-DO replace this with label map
+# TODO For other class detections than spines, one have to replace this with label map evaluation
 def class_text_to_int(row_label):
     if row_label == 'spine':
         return 1
     else:
         None
-
 
 def split(df, group):
     data = namedtuple('data', ['filename', 'object'])
@@ -82,16 +81,16 @@ def create_tf_example(group, path):
 
 
 def main(_):
-    writer = tf.python_io.TFRecordWriter(FLAGS.output_path)
-    path = os.path.join(FLAGS.image_dir)
-    examples = pd.read_csv(FLAGS.csv_input)
+    writer = tf.python_io.TFRecordWriter(args.output_path) # FLAGS.output_path)
+    path = os.path.join(args.image_dir) # FLAGS.image_dir)
+    examples = pd.read_csv(args.csv_input)
     grouped = split(examples, 'filename')
     for group in grouped:
         tf_example = create_tf_example(group, path)
         writer.write(tf_example.SerializeToString())
 
     writer.close()
-    output_path = os.path.join(os.getcwd(), FLAGS.output_path)
+    output_path = os.path.join(os.getcwd(), args.output_path)
     print('[INFO] Successfully created the TFRecords: {}'.format(output_path))
 
 

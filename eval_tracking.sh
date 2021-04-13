@@ -1,2 +1,2 @@
-export PYTHONPATH=$PYTHONPATH:/models/research/slim:/models/research:/models/research/object_detection
+export PYTHONPATH=$PYTHONPATH:models/research/slim:models/research:models/research/object_detection
 python3 evaluate_tracking.py -det output/tracking/default_model -gt output/tracking/GT/data_tracking.csv -tr data_tracking_model.csv -sn default_model_results

@@ -1,21 +1,25 @@
 # annotation files which cannot be used like this as images are missing
 data/default_annotations/*.csv
 
-# no checkpoint or model files
+# checkpoint oand model files
 *.pbtxt
 *.pb
 checkpoint
 *.ckpt.*
 
+# all record files as they are too big
+*.record
+
+# all image files besides the example images
+*.png
+*.jpg
+*.jpeg
+!data/examples/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
-
-# own model
-own_models/
-data/raw/
 
 # C extensions
 *.so

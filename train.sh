@@ -1,2 +1,2 @@
-export PYTHONPATH=$PYTHONPATH:/models/research/slim:/models/research:/models/research/object_detection
+export PYTHONPATH=$PYTHONPATH:models/research/slim:models/research:models/research/object_detection
 python train.py --model_dir=own_models/run1 --pipeline_config_path=config_files/default_model.config --num_train_steps=15000 --alsologtostderr
