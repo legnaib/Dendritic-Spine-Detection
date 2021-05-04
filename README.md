@@ -18,7 +18,12 @@ All necessary packages are listed in the `requirements.txt` file. To install pac
 ```
 pip install -r requirements.txt
 ```
-The model, training and evaluation images are not saved in GitHub, but can be downloaded [here](https://drive.google.com/uc?export=download&id=1r9bGOeOxEd6Clg8Sw5ajcxLO-C_xC9K8). The model and images should then be extracted into the `own_models/default_model` and `data/raw` folder. Training and tracking evaluation are also available as shell scripts with some predefined arguments.
+The model, training and evaluation images are not saved in GitHub, but are available for download. The data can automatically be downloaded and extracted into the correct folders using the following command:
+```
+sh download_data.sh
+```
+
+If more control over the data is required, the model can be downloaded [here](https://drive.google.com/uc?export=download&id=1IqXEYAbruormi9g354a1MtugQJQiZKGL) and the images with their labels can be downloaded [here](https://drive.google.com/uc?export=download&id=1yi2tQ-0oJhElaSUDFn_UpZ-bUO0bH3_N). The model and images should then be extracted into the `own_models/default_model` and `data/raw` folder. Training and tracking evaluation are also available as shell scripts with some predefined arguments.
 
 ## Folder structure
 This github repository provides all necessary files to predict and track dendritic spines as described in the paper TODO. Retraining on another dataset is possible as well. The mainly relevant files and structures of this repository are:
