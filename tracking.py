@@ -157,7 +157,7 @@ if __name__ == '__main__':
     # get all boxes, scores and classes at the start if prediction is necessary:
     if args.csv is None:
         detection_graph = predict.load_model(args.model)
-        all_boxes, all_scores, all_classes, all_num_detections = predict.predict_images(detection_graph, args.images, img_output_path, csv_output_path, THRESH, save_csv=False, return_csv=True):
+        all_boxes, all_scores, all_classes, all_num_detections = predict.predict_images(detection_graph, args.images, img_output_path, csv_output_path, THRESH, save_csv=False, return_csv=True)
 
     ct = CT.CentroidTracker(maxDisappeared=MAX_DIS, minAppeared=MIN_APP, maxDiff=MAX_DIFF, iomThresh=IOM_THRESH, maxVol=MAX_VOL, metric=METRIC)
 
