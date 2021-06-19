@@ -7,8 +7,9 @@ import pandas as pd
 import time
 import scipy.io
 import predict
+from pathlib import Path
 
-from utils import CentroidTracker as CT
+from utils import CentroidTracker
 from collections import OrderedDict
 
 # models/research/object_detection muss im PYTHONPATH sein
@@ -32,23 +33,19 @@ parser.add_argument('-ta', '--tau',
     help='Threshold for tau (tracking threshold)', default=0.3, type=float)
 parser.add_argument('-m', '--model',
     help='Path to model you want to analyze with')
-# parser.add_argument('-lm', '--labelmap',
-#     help='Path to labelmap', default='data/spine_label_map.pbtxt')
 parser.add_argument('-c', '--csv', required=False,
     help='Single file or folder of csv files for previous prediction. If this flag is set, no model prediction will be executed')
 
-parser.add_argument('-s', '--save_images', action='store_true', \
+parser.add_argument('-s', '--save-images', action='store_true', \
     help='Activate this flag if images should be saved')
 parser.add_argument('-o', '--output', required=False, \
     help='Path where tracking images and csv should be saved, default: output/tracking/MODEL')
-parser.add_argument('-f', '--file_save',
+parser.add_argument('-f', '--file-save',
     help="Name of tracked data csv file", default="data_tracking.csv")
-#parser.add_argument('-g', '--gpu',
-#    help='GPU Number')
-#parser.add_argument('-n', '--no_prediction',
-#    help='NOT IMPLEMENTED Make prediction on images again/ y/n')
 parser.add_argument('-mc', '--metric', default='iom',
     help='Metric which should be used for evaluating. Currently available: iom, iou. Own metric can be implemented as lambda function which takes two arguments and returns one.')
+parser.add_argument('-uo', '--use-offsets', action='store_true',
+    help='whether offsets should be used or not')
 
 def draw_boxes2(img, objects):
     return np.zeros((1,1))
@@ -114,7 +111,7 @@ if __name__ == '__main__':
     # args.save, args.output
     
     #df = pd.DataFrame(columns=['filename', 'width', 'height', 'class', 'xmin', 'ymin', 'xmax', 'ymax'])
-    if args.tif is None and args.images is None:
+    if args.images is None:
         raise ValueError('You need specify input images or input tif stack!')
 
     # save_folder: folder where tracking csv file will be saved
@@ -152,21 +149,42 @@ if __name__ == '__main__':
         all_csv_files = glob.glob(args.csv)
         if len(all_csv_files) == 0:
             raise ValueError('No csv files with valid prediction data are available.')
-        csv_path = args.csv 
+        csv_path = args.csv
 
     # get all boxes, scores and classes at the start if prediction is necessary:
     if args.csv is None:
         detection_graph = predict.load_model(args.model)
         all_boxes, all_scores, all_classes, all_num_detections = predict.predict_images(detection_graph, args.images, img_output_path, csv_output_path, THRESH, save_csv=False, return_csv=True)
+    all_csv_paths = list(Path().rglob(args.csv))
 
-    ct = CT.CentroidTracker(maxDisappeared=MAX_DIS, minAppeared=MIN_APP, maxDiff=MAX_DIFF, iomThresh=IOM_THRESH, maxVol=MAX_VOL, metric=METRIC)
+    ct = CentroidTracker(maxDisappeared=MAX_DIS, minAppeared=MIN_APP, maxDiff=MAX_DIFF, iomThresh=IOM_THRESH, maxVol=MAX_VOL, metric=METRIC)
+
+    # get offsets if we want to use them
+    if args.use_offsets:
+        sr, neuron, dend, day = 52, 1, 1, 1
+        arrx = scipy.io.loadmat(f'data/offsets/SR{sr}N{neuron}D{dend}offsetX.mat')[f'SR{sr}N{neuron}D{dend}offsetX']
+        arry = scipy.io.loadmat(f'data/offsets/SR{sr}N{neuron}D{dend}offsetY.mat')[f'SR{sr}N{neuron}D{dend}offsetY']
+
+        # get offset for each stack
+        offsets = np.array(list(zip(arrx[:,day-1], arry[:,day-1]))).astype(int)
+        
+        # double offsets so that it can easily be added to bounding boxes
+        offsets = np.concatenate((offsets, offsets), axis=1) / 512  # divide through width = height = 512 to get correct box-offset
+        
+        # make offset positive by subtracting possible negative offsets (including first offset of 0)
+        offsets = offsets - np.min(offsets, axis=0)
 
     # use given prediction for all images, if csv is available
     for i, img in enumerate(all_imgs):
-        orig_img = img.split('/')[-1]
+        orig_img = Path(img).name
         if args.csv is not None:
-            if os.path.splitext(args.csv)[1] != '.csv':
-                csv_path = os.path.join(args.csv, os.path.splitext(orig_img)[0]+'.csv')
+            if len(all_csv_paths) > 1:
+                csv_path = [elem for elem in all_csv_paths if orig_img[:-4] == elem.name[:-4]]
+                if len(csv_path) == 0:
+                    # no corresponding csv file for this image
+                    continue
+                else:
+                    csv_path = csv_path[0]
                 try:
                     new_df = pd.read_csv(csv_path)
                     boxes, scores, classes, num_detections = csv_to_boxes(new_df)
@@ -197,9 +215,16 @@ if __name__ == '__main__':
         if len(boxes) == 0:
             continue
 
+        # convert all detections from different stacks into one stack (via offset matlab files)
+        if args.use_offsets:
+            # format of img name: SR52N1D1day1stack1-xx.png
+            stack_nr = int(orig_img[-8])
+            boxes += offsets[stack_nr - 1]
+
         scores = scores[0]
         num_detections = int(num_detections[0])
 
+        image_np = cv2.imread(img)
         h, w = image_np.shape[:2]
         # Real tracking part!
         #print(scores.shape, boxes.shape, num_detections, scores, scores[0])

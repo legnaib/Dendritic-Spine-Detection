@@ -79,7 +79,7 @@ The name of the model which the user wants to use is referred to as `MODEL_NAME`
 
 An example prediction will look like this:
 ```
-python predict.py --model=MODEL_NAME --input="data/raw_images/SR052*.png" --save_images
+python predict.py --model=MODEL_NAME --input="data/raw/SR052*.png" --save_images
 ```
 All images with their predictions will be saved in the folder `output/prediction/MODEL_NAME/images` and all csv files will be saved in `output/prediction/MODEL_NAME/csvs`.
 
@@ -88,13 +88,13 @@ All images with their predictions will be saved in the folder `output/prediction
 If a 3D-stack of images should be analyzed there are two possibilities to do that:
 1. Predict and track everything in one single command:
     ```
-    python tracking.py --model=MODEL_NAME --images="data/raw_images/SR052*.png" --save_images
+    python tracking.py --model=MODEL_NAME --images="data/raw/SR052*.png" --save_images
     ```
 2. Predict first or choose different prediction files and use the tracking algorithm to get total 3D-trajectories. Two commands must be executed for that:
     ```
-    python predict.py --model=MODEL_NAME --input="data/raw_images/SR052*.png"
+    python predict.py --model=MODEL_NAME --input="data/raw/SR052*.png"
 
-    python tracking.py --model=MODEL_NAME --images="data/raw_images/SR052*.png" --csv="output/prediction/MODEL_NAME/csvs/*.csv" --save_images
+    python tracking.py --model=MODEL_NAME --images="data/raw/SR052*.png" --csv="output/prediction/MODEL_NAME/csvs/*.csv" --save_images
     ```
     Every csv-file in a valid format can be used at the `--csv`-flag to determine which predictions the tracking algorithm should take.
 
