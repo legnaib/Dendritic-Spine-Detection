@@ -126,8 +126,9 @@ if __name__ == '__main__':
 
     # save_folder: folder where tracking csv file will be saved
     # folder: name of folder which is used in csv file for generating filename-column
-    model_name = args.model.split(
-        "/")[-1] if args.model.split("/")[-1] != "" else args.model.split("/")[-2]
+    if args.model is not None:
+        model_name = args.model.split(
+            "/")[-1] if args.model.split("/")[-1] != "" else args.model.split("/")[-2]
     if args.output is None:
         args.output = os.path.join('output/tracking', model_name)
     if not os.path.exists(args.output):
