@@ -315,7 +315,7 @@ def predict_images(detection_graph: tf.Graph, image_path: str, output_path: str,
                     feed_dict={image_tensor: image_np_expanded})
                 #print('Boxes: ', boxes, 'scores', scores, 'classes', classes, 'num dets', num_detections)
 
-                if return_csv:
+                if save_csv:
                     all_boxes.append(boxes)
                     all_scores.append(scores)
                     all_classes.append(classes)
@@ -402,7 +402,7 @@ if __name__ == '__main__':
     nr_imgs = len(list(glob.glob(args.input)))
     print("[INFO] Starting predictions ...")
     if not args.use_csv:
-        _, predict_images(detection_graph, args.input,
+        _ = predict_images(detection_graph, args.input,
                           output_path, csv_path, args.threshold)
     else:
         changed_df = False
